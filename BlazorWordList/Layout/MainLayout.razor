@@ -1,16 +1,32 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<div class="min-h-screen bg-slate-50 selection:bg-slate-900 selection:text-slate-50">
+    <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+        <div class="container flex h-16 max-w-7xl mx-auto items-center justify-between px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-xs">MS</span>
+                </div>
+                <span class="text-xl font-bold tracking-tight text-slate-900">Myanmar Spell Checker</span>
+            </div>
+            <nav class="flex items-center gap-6">
+                <a href="/" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Home</a>
+                <a href="https://github.com" target="_blank" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">GitHub</a>
+            </nav>
         </div>
+    </header>
 
-        <article class="content px-4">
-            @Body
-        </article>
+    <main class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        @Body
     </main>
+
+    <footer class="border-t border-slate-200 py-8 bg-white">
+        <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between text-slate-500 text-sm">
+            <p>© 2026 Myanmar Spell Assistant. Built with Blazor WASM.</p>
+            <div class="flex gap-4 mt-4 md:mt-0">
+                <a href="#" class="hover:text-slate-900 transition-colors">Privacy</a>
+                <a href="#" class="hover:text-slate-900 transition-colors">Terms</a>
+            </div>
+        </div>
+    </footer>
 </div>
