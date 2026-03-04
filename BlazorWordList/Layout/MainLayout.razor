@@ -1,30 +1,125 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="min-h-screen bg-slate-50 selection:bg-slate-900 selection:text-slate-50">
-    <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
-        <div class="container flex h-16 max-w-7xl mx-auto items-center justify-between px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center gap-3">
-                <img src="logo.svg" alt="Myanmar Spell Checker Logo" class="w-8 h-8 rounded-lg" />
-                <span class="text-xl font-bold tracking-tight text-slate-900">Myanmar Spell Assistant</span>
+<div class="relative flex min-h-screen flex-col font-sans selection:bg-primary/20">
+    <header class="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div class="container flex h-16 max-w-7xl mx-auto items-center justify-between px-4 sm:px-8">
+            <div class="flex items-center gap-6">
+                <a href="/" class="flex items-center gap-2 group">
+                    <img src="logo.svg" alt="Myanmar Dictionary Logo" class="h-9 w-9 rounded-xl shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform" />
+                    <span class="hidden font-bold text-xl tracking-tight sm:inline-block brand-gradient">Myanmar Dictionary</span>
+                </a>
+                <nav class="hidden md:flex items-center gap-6">
+                    <NavLink href="" Match="NavLinkMatch.All" class="text-sm font-medium text-muted-foreground transition-all hover:text-foreground active-link" ActiveClass="!text-foreground !font-bold">Home</NavLink>
+                    <NavLink href="/spell-check" class="text-sm font-medium text-muted-foreground transition-all hover:text-foreground active-link" ActiveClass="!text-foreground !font-bold">Spell Checker</NavLink>
+                </nav>
             </div>
-            <nav class="flex items-center gap-6">
-                <a href="/" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Home</a>
-                <a href="https://github.com" target="_blank" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">GitHub</a>
-            </nav>
+
+            <div class="flex items-center gap-2">
+                <ThemeToggle />
+                <button class="inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-accent hover:text-accent-foreground md:hidden transition-colors" 
+                        @onclick="ToggleMobileMenu" aria-label="Toggle menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                        @if (_isMobileMenuOpen)
+                        {
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        }
+                        else
+                        {
+                            <line x1="4" y1="12" x2="20" y2="12"></line>
+                            <line x1="4" y1="6" x2="20" y2="6"></line>
+                            <line x1="4" y1="18" x2="20" y2="18"></line>
+                        }
+                    </svg>
+                </button>
+            </div>
         </div>
+
+        @if (_isMobileMenuOpen)
+        {
+            <div class="fixed inset-0 top-16 z-50 grid h-[calc(100vh-4rem)] grid-flow-row auto-rows-max overflow-auto p-6 animate-in slide-in-from-top-4 bg-background items-start md:hidden">
+                <nav class="grid gap-4">
+                    <NavLink href="" Match="NavLinkMatch.All" class="flex w-full items-center rounded-lg p-3 text-lg font-semibold hover:bg-accent transition-colors" @onclick="CloseMobileMenu">Home</NavLink>
+                    <NavLink href="/spell-check" class="flex w-full items-center rounded-lg p-3 text-lg font-semibold hover:bg-accent transition-colors" @onclick="CloseMobileMenu">Spell Checker</NavLink>
+                </nav>
+            </div>
+        }
     </header>
 
-    <main class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <main class="flex-1">
         @Body
     </main>
 
-    <footer class="border-t border-slate-200 py-8 bg-white">
-        <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between text-slate-500 text-sm">
-            <p>© 2026 Myanmar Spell Assistant. Built with Blazor WASM.</p>
-            <div class="flex gap-4 mt-4 md:mt-0">
-                <a href="#" class="hover:text-slate-900 transition-colors">Privacy</a>
-                <a href="#" class="hover:text-slate-900 transition-colors">Terms</a>
+    <footer style="border-top: 1px solid var(--border); background: var(--muted); padding: 2.5rem 0 1.5rem;">
+        <div style="max-width: 80rem; margin: 0 auto; padding: 0 1.5rem;">
+
+            <!-- Main footer row -->
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem;">
+
+                <!-- Left: Brand -->
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 20rem;">
+                    <div style="display: flex; align-items: center; gap: 0.625rem;">
+                        <img src="logo.svg" alt="Myanmar Dictionary Logo"
+                             style="width: 28px; height: 28px; border-radius: 8px; display: block; flex-shrink: 0;" />
+                        <span style="font-weight: 700; font-size: 0.9rem; letter-spacing: -0.01em; color: var(--foreground);">Myanmar Dictionary</span>
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--muted-foreground); line-height: 1.6; margin: 0;">
+                        A privacy-first Myanmar language toolset. Everything runs in your browser — no servers, no tracking.
+                    </p>
+                </div>
+
+                <!-- Right: Links -->
+                <div style="display: flex; gap: 3rem; flex-wrap: wrap;">
+                    <!-- Product links -->
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--foreground);">Product</span>
+                        <a href="/" style="font-size: 0.82rem; color: var(--muted-foreground); text-decoration: none; transition: color 0.15s;"
+                           onmouseover="this.style.color='var(--foreground)'" onmouseout="this.style.color='var(--muted-foreground)'">Dictionary</a>
+                        <a href="/spell-check" style="font-size: 0.82rem; color: var(--muted-foreground); text-decoration: none; transition: color 0.15s;"
+                           onmouseover="this.style.color='var(--foreground)'" onmouseout="this.style.color='var(--muted-foreground)'">Spell Checker</a>
+                    </div>
+
+                    <!-- Credits links -->
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--foreground);">Credits</span>
+                        <a href="https://github.com/kanaung/wordlists" target="_blank" rel="noopener noreferrer"
+                           style="font-size: 0.82rem; color: var(--muted-foreground); text-decoration: none; display: flex; align-items: center; gap: 0.4rem; transition: color 0.15s;"
+                           onmouseover="this.style.color='var(--foreground)'" onmouseout="this.style.color='var(--muted-foreground)'">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                            kanaung/wordlists
+                        </a>
+                        <a href="https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor" target="_blank" rel="noopener noreferrer"
+                           style="font-size: 0.82rem; color: var(--muted-foreground); text-decoration: none; transition: color 0.15s;"
+                           onmouseover="this.style.color='var(--foreground)'" onmouseout="this.style.color='var(--muted-foreground)'">Blazor WASM</a>
+                        <a href="https://tailwindcss.com" target="_blank" rel="noopener noreferrer"
+                           style="font-size: 0.82rem; color: var(--muted-foreground); text-decoration: none; transition: color 0.15s;"
+                           onmouseover="this.style.color='var(--foreground)'" onmouseout="this.style.color='var(--muted-foreground)'">Tailwind CSS v4</a>
+                    </div>
+                </div>
             </div>
+
+            <!-- Bottom bar -->
+            <div style="border-top: 1px solid var(--border); padding-top: 1.25rem; display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: space-between; align-items: center;">
+                <p style="font-size: 0.72rem; color: var(--muted-foreground); margin: 0;">
+                    © 2026 Myanmar Dictionary. Built with ❤️ for the Myanmar Developer Community.
+                </p>
+                <p style="font-size: 0.72rem; color: var(--muted-foreground); margin: 0;">
+                    Wordlist data from
+                    <a href="https://github.com/kanaung/wordlists" target="_blank" rel="noopener noreferrer"
+                       style="color: var(--primary); text-decoration: underline; text-underline-offset: 3px;">kanaung/wordlists</a>
+                </p>
+            </div>
+
         </div>
     </footer>
 </div>
+
+@code {
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    private bool _isMobileMenuOpen = false;
+
+    private void ToggleMobileMenu() => _isMobileMenuOpen = !_isMobileMenuOpen;
+    private void CloseMobileMenu() => _isMobileMenuOpen = false;
+}
