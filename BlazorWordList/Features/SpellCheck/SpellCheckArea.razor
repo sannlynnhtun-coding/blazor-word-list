@@ -4,61 +4,118 @@
 @inject DictionaryLoaderService DictionaryLoader
 @inject IJSRuntime JSRuntime
 
-<div class="max-w-4xl mx-auto p-6 space-y-8">
-    <div class="flex flex-col space-y-2">
-        <h1 class="text-4xl font-bold tracking-tight text-slate-900 font-myanmar">မြန်မာစာလုံးပေါင်း စစ်ဆေးခြင်း</h1>
-        <p class="text-slate-500">Fast, private, and client-side Myanmar spelling assistant.</p>
+<div class="container max-w-5xl mx-auto px-4 py-12 md:py-20 animate-in fade-in slide-in-from-bottom-6 duration-700">
+    <div class="flex flex-col space-y-4 mb-12 text-center sm:text-left">
+        <div class="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest w-fit mx-auto sm:mx-0">
+            Intelligent Assistant
+        </div>
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight brand-gradient">Myanmar Spell Checker</h1>
+        <p class="text-muted-foreground text-lg max-w-2xl">Refine your writing with our AI-powered spelling assistant. Secure, local, and incredibly fast.</p>
     </div>
 
     @if (!_isInitialized)
     {
-        <div class="flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-200 rounded-xl bg-white space-y-4">
-            <div class="w-12 h-12 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin"></div>
-            <p class="text-slate-600 font-medium font-myanmar">အဘိဓာန်ကို အဆင်သင့်ဖြစ်အောင် လုပ်ဆောင်နေပါသည်...</p>
-            <p class="text-xs text-slate-400">Loading dictionary files into memory...</p>
+        <div class="flex flex-col items-center justify-center p-12 md:p-20 border-2 border-dashed border-border rounded-[2.5rem] bg-card/50 space-y-6">
+            <div class="relative h-16 w-16">
+                <div class="absolute inset-0 rounded-full border-4 border-primary/20"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+            </div>
+            <div class="text-center space-y-2">
+                <p class="text-xl font-bold font-myanmar">အဘိဓာန်ကို အဆင်သင့်ဖြစ်အောင် လုပ်ဆောင်နေပါသည်...</p>
+                <p class="text-sm text-muted-foreground">Preparing local language intelligence models...</p>
+            </div>
         </div>
     }
     else
     {
-        <div class="relative flex flex-col space-y-4">
-            <div class="flex items-center justify-between">
-                <label class="text-sm font-semibold text-slate-700 uppercase tracking-wider">တည်းဖြတ်ရန် နေရာ</label>
-                <div class="flex items-center space-y-0 space-x-2">
-                    <button @onclick="ClearText" class="text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors">Clear</button>
-                    <span class="text-slate-300">|</span>
-                    <button @onclick="ExportText" class="text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors">Export .txt</button>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Left Side: Editor -->
+            <div class="lg:col-span-3 space-y-4">
+                <div class="flex items-center justify-between px-2">
+                    <span class="text-xs font-bold text-muted-foreground uppercase tracking-widest">Writing Canvas</span>
+                    <div class="flex items-center gap-2">
+                        <button @onclick="ClearText" class="inline-flex items-center justify-center rounded-lg border border-input bg-background px-3 py-1.5 text-xs font-medium transition-all hover:bg-accent hover:text-accent-foreground active:scale-95 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                            Clear
+                        </button>
+                        <button @onclick="ExportText" class="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-3 py-1.5 text-xs font-medium transition-all hover:bg-primary/90 active:scale-95 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Save .txt
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative group">
+                    <div class="absolute -inset-0.5 rounded-[2rem] bg-gradient-to-r from-primary/10 to-purple-500/10 opacity-0 group-focus-within:opacity-100 transition duration-500 blur"></div>
+                    <div id="@_editorId"
+                         @ref="_editorContainer" 
+                         contenteditable="true"
+                         @oninput="HandleInput"
+                         class="relative block w-full min-h-[400px] md:min-h-[500px] p-8 md:p-10 text-xl leading-relaxed text-foreground bg-card border-2 border-border rounded-[2rem] shadow-xl focus:outline-none focus:border-primary/50 transition-all font-myanmar selection:bg-primary/20"
+                         placeholder="ဤနေရာတွင် စာရိုက်ပါ...">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between px-4 text-xs font-medium text-muted-foreground">
+                    <div class="flex items-center gap-4">
+                        <span class="flex items-center gap-1.5"><div class="h-1.5 w-1.5 rounded-full bg-primary/40"></div> @_wordCount words</span>
+                        <span class="flex items-center gap-1.5"><div class="h-1.5 w-1.5 rounded-full bg-primary/40"></div> @_charCount characters</span>
+                    </div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 border border-border/50">
+                        <div class="h-2 w-2 rounded-full @(_isDictionaryLoaded ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-amber-500")"></div>
+                        <span class="text-[9px] uppercase tracking-wider">@(_isDictionaryLoaded ? "Engine Ready" : "Initializing...")</span>
+                    </div>
                 </div>
             </div>
 
-            <div id="@_editorId"
-                 @ref="_editorContainer" 
-                 contenteditable="true"
-                 @oninput="HandleInput"
-                 class="min-h-[400px] p-6 text-xl leading-relaxed text-slate-800 bg-white border border-slate-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 transition-all font-myanmar"
-                 placeholder="ဤနေရာတွင် စာရိုက်ပါ...">
-            </div>
+            <!-- Right Side: Sidebar Info -->
+            <div class="space-y-6">
+                <div class="p-6 rounded-3xl bg-secondary/30 border border-border space-y-4">
+                    <h3 class="font-bold text-sm uppercase tracking-widest text-muted-foreground">Quick Tips</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex gap-3">
+                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold">1</span>
+                            <p>Words underlined in <span class="text-destructive font-bold underline decoration-wavy underline-offset-4">red</span> are potential spelling errors.</p>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold">2</span>
+                            <p>Click on any underlined word to see smart corrections.</p>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold">3</span>
+                            <p>Suggestions are provided in real-time as you type.</p>
+                        </li>
+                    </ul>
+                </div>
 
-            <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
-                <div>@_wordCount words | @_charCount characters</div>
-                <div class="flex items-center space-x-1">
-                    <div class="w-2 h-2 rounded-full @(_isDictionaryLoaded ? "bg-emerald-500" : "bg-amber-500")"></div>
-                    <span>@(_isDictionaryLoaded ? "Dictionary Offline-Ready" : "Loading Dictionary...")</span>
+                <div class="p-6 rounded-3xl border border-border space-y-4 shadow-sm bg-card">
+                    <div class="flex items-center gap-3">
+                        <div class="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </div>
+                        <h3 class="font-bold text-sm uppercase tracking-wider">Secure & Private</h3>
+                    </div>
+                    <p class="text-xs text-muted-foreground leading-relaxed">No text is ever sent to a server. All processing happens right in your browser, keeping your writing 100% private.</p>
                 </div>
             </div>
         </div>
     }
 
+    <!-- Suggestions Popup -->
     @if (_showPopup && _suggestions.Any())
     {
-        <div class="fixed z-[100] p-1 bg-white border border-slate-200 rounded-lg shadow-xl animate-in fade-in zoom-in-95 duration-100"
-             style="left: @(_popupLeft)px; top: @(_popupTop)px; min-width: 150px;">
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 py-1 mb-1 border-b border-slate-50">Suggestions</div>
-            <div class="flex flex-col">
+        <div class="fixed z-[100] p-1.5 bg-popover border-2 border-border rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-150 ring-4 ring-primary/5"
+             style="left: @(_popupLeft)px; top: @(_popupTop)px; min-width: 180px;">
+            <div class="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-3 py-2 mb-1 border-b border-border/50">Smart Suggestions</div>
+            <div class="flex flex-col gap-1">
                 @foreach (var suggestion in _suggestions)
                 {
                     <button @onclick="() => ApplySuggestion(suggestion)" 
-                            class="px-3 py-2 text-left hover:bg-slate-50 text-slate-900 text-sm font-medium rounded-md transition-colors font-myanmar">
-                        @suggestion
+                            class="px-3 py-2.5 text-left hover:bg-primary hover:text-primary-foreground text-foreground text-base shadow-sm font-medium rounded-xl transition-all font-myanmar group active:scale-[0.98]">
+                        <div class="flex items-center justify-between">
+                            <span>@suggestion</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="opacity-30 group-hover:opacity-100 transition-opacity"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
                     </button>
                 }
             </div>
@@ -134,7 +191,8 @@
         {
             await InvokeAsync(async () => 
             {
-                var words = _currentText.Split(new[] { ' ', '\n', '\r', '\t', '.', ',', '!', '?', '(', ')', '[', ']', '{', '}' }, StringSplitOptions.RemoveEmptyEntries);
+                var textSnippet = await JSRuntime.InvokeAsync<string>("eval", $"document.getElementById('{_editorId}').innerText");
+                var words = textSnippet.Split(new[] { ' ', '\n', '\r', '\t', '.', ',', '!', '?', '(', ')', '[', ']', '{', '}' }, StringSplitOptions.RemoveEmptyEntries);
                 var misspelled = words.Where(w => !SpellCheckService.IsWordCorrect(w)).Distinct().ToList();
                 
                 await JSRuntime.InvokeVoidAsync("spellCheck.updateHighlights", _editorId, misspelled);
@@ -155,8 +213,8 @@
         _charCount = 0;
         _suggestions.Clear();
         _showPopup = false;
-        // Clear editor via JS
         JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('{_editorId}').innerText = ''");
+        JSRuntime.InvokeVoidAsync("spellCheck.updateHighlights", _editorId, new List<string>());
     }
 
     private async Task ExportText()
@@ -171,7 +229,6 @@
         _showPopup = false;
         _suggestions.Clear();
         
-        // Trigger a re-check after replacement
         _currentText = await JSRuntime.InvokeAsync<string>("eval", $"document.getElementById('{_editorId}').innerText");
         UpdateStats();
         await RunSpellCheckDebounced();
