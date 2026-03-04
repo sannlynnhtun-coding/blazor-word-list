@@ -16,6 +16,8 @@ namespace BlazorWordList.Features.DictionaryLoader
             "data/ဟ.list", "data/ဠ.list", "data/အ.list"
         };
 
+        private HashSet<string>? _cachedWords;
+
         public DictionaryLoaderService(HttpClient httpClient)
         {
             _httpClient = httpClient;
@@ -23,6 +25,8 @@ namespace BlazorWordList.Features.DictionaryLoader
 
         public async Task<HashSet<string>> LoadAllWordsAsync()
         {
+            if (_cachedWords != null) return _cachedWords;
+
             var allWords = new HashSet<string>(StringComparer.Ordinal);
             
             foreach (var fileName in _availableFiles)
@@ -33,7 +37,11 @@ namespace BlazorWordList.Features.DictionaryLoader
                     var words = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (var word in words)
                     {
-                        allWords.Add(word.Trim());
+                        var trimmedWord = word.Trim();
+                        if (!string.IsNullOrWhiteSpace(trimmedWord))
+                        {
+                            allWords.Add(trimmedWord);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -42,7 +50,21 @@ namespace BlazorWordList.Features.DictionaryLoader
                 }
             }
 
+            _cachedWords = allWords;
             return allWords;
+        }
+
+        public async Task<List<string>> SearchWordsAsync(string query, int maxResults = 50)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return new List<string>();
+
+            var allWords = await LoadAllWordsAsync();
+            return allWords
+                .Where(w => w.StartsWith(query, StringComparison.Ordinal))
+                .OrderBy(w => w.Length)
+                .ThenBy(w => w)
+                .Take(maxResults)
+                .ToList();
         }
     }
 }
