@@ -17,12 +17,24 @@
 </head>
 
 <body>
-    <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+    <div id="app" class="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
+        <div class="flex flex-col items-center space-y-6 animate-in fade-in duration-700">
+            <div class="relative">
+                <div class="w-16 h-16 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
+                <!-- <img src="logo.svg" alt="Loading..." class="absolute inset-0 m-auto w-8 h-8 rounded-md" /> -->
+            </div>
+            <div class="flex flex-col items-center space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">Myanmar Spell Assistant</h2>
+                <div class="flex items-center space-x-2">
+                    <div class="loading-progress-text text-sm font-medium text-slate-500">Loading...</div>
+                    <div class="flex space-x-1">
+                        <div class="w-1 h-1 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                        <div class="w-1 h-1 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                        <div class="w-1 h-1 bg-slate-400 rounded-full animate-bounce"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!--<div id="blazor-error-ui">
