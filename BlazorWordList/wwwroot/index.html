@@ -4,44 +4,106 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BlazorWordList</title>
+
+    <!-- ─── Primary Meta ─── -->
+    <title>Myanmar Dictionary</title>
+    <meta name="description"
+        content="The most powerful Myanmar language toolset. Search thousands of words. Fast, private, and offline-first." />
+    <meta name="author" content="Myanmar Dictionary" />
+    <meta name="keywords" content="myanmar dictionary, myanmar words, myanmar spell checker, မြန်မာဘာသာ" />
+
+    <!-- ─── Theme Color ─── -->
+    <meta name="theme-color" content="#38bdf8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+    <meta name="msapplication-TileColor" content="#0f172a" />
+
+    <!-- ─── Open Graph / Social ─── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="/" />
+    <meta property="og:title" content="Myanmar Dictionary" />
+    <meta property="og:description"
+        content="The most powerful Myanmar language toolset. Fast, private, and offline-first." />
+    <meta property="og:image" content="logo.svg" />
+    <meta property="og:image:type" content="image/svg+xml" />
+    <meta property="og:site_name" content="Myanmar Dictionary" />
+
+    <!-- ─── Twitter / X Card ─── -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Myanmar Dictionary" />
+    <meta name="twitter:description" content="Fast, private, and offline-first Myanmar language toolset." />
+    <meta name="twitter:image" content="logo.svg" />
+
+    <!-- ─── Icons ─── -->
+    <link rel="icon" type="image/svg+xml" href="logo.svg" />
+    <link rel="apple-touch-icon" href="logo.svg" />
+    <link rel="shortcut icon" href="logo.svg" />
+
+    <!-- ─── PWA ─── -->
+    <link href="manifest.webmanifest" rel="manifest" />
+
+    <!-- ─── Fonts ─── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- ─── Styles ─── -->
     <base href="/" />
     <link rel="preload" id="webassembly" />
     <link rel="stylesheet" href="css/output.css" />
-    <link rel="icon" type="image/svg+xml" href="logo.svg" />
-    <!--<link href="BlazorWordList.styles.css" rel="stylesheet" />-->
-    <link href="manifest.webmanifest" rel="manifest" />
-    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
     <script type="importmap"></script>
 </head>
 
 <body>
-    <div id="app" class="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
-        <div class="flex flex-col items-center space-y-6 animate-in fade-in duration-700">
-            <div class="relative">
-                <div class="w-16 h-16 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
-                <!-- <img src="logo.svg" alt="Loading..." class="absolute inset-0 m-auto w-8 h-8 rounded-md" /> -->
-            </div>
-            <div class="flex flex-col items-center space-y-2">
-                <h2 class="text-xl font-bold text-slate-900">Myanmar Spell Assistant</h2>
-                <div class="flex items-center space-x-2">
-                    <div class="loading-progress-text text-sm font-medium text-slate-500">Loading...</div>
-                    <div class="flex space-x-1">
-                        <div class="w-1 h-1 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                        <div class="w-1 h-1 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                        <div class="w-1 h-1 bg-slate-400 rounded-full animate-bounce"></div>
+    <div id="app">
+        <!-- Splash screen shown while Blazor WASM loads -->
+        <div id="loading-screen" style="
+            position: fixed; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 2rem;
+            background: #fff;
+            font-family: 'Inter', system-ui, sans-serif;
+            transition: opacity 0.4s ease;
+        ">
+            <img src="logo.svg" alt="Myanmar Dictionary" style="width:72px; height:72px; border-radius:16px;" />
+            <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+                <h1 style="font-size:1.75rem; font-weight:800; letter-spacing:-0.03em; color:#0f172a; margin:0;">Myanmar
+                    Dictionary</h1>
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <span class="loading-progress-text"
+                        style="font-size:0.75rem; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.1em;">Loading</span>
+                    <div style="display:flex; gap:4px;">
+                        <div
+                            style="width:6px;height:6px;border-radius:50%;background:#38bdf8;animation:bounce 1s infinite;animation-delay:-0.3s;">
+                        </div>
+                        <div
+                            style="width:6px;height:6px;border-radius:50%;background:#38bdf8;animation:bounce 1s infinite;animation-delay:-0.15s;">
+                        </div>
+                        <div
+                            style="width:6px;height:6px;border-radius:50%;background:#38bdf8;animation:bounce 1s infinite;">
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!--<div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="." class="reload">Reload</a>
-        <span class="dismiss">🗙</span>
-    </div>-->
+    <style>
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+    </style>
+
+    <script src="js/theme.js"></script>
+    <script>window.themeManager.initTheme();</script>
     <script src="js/spellchecker.js"></script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
     <script>navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });</script>
