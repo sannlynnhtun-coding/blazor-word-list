@@ -1,0 +1,179 @@
+@using BlazorWordList.Features.SpellCheck
+@using BlazorWordList.Features.DictionaryLoader
+@inject SpellCheckService SpellCheckService
+@inject DictionaryLoaderService DictionaryLoader
+@inject IJSRuntime JSRuntime
+
+<div class="max-w-4xl mx-auto p-6 space-y-8">
+    <div class="flex flex-col space-y-2">
+        <h1 class="text-4xl font-bold tracking-tight text-slate-900 font-myanmar">မြန်မာစာလုံးပေါင်း စစ်ဆေးခြင်း</h1>
+        <p class="text-slate-500">Fast, private, and client-side Myanmar spelling assistant.</p>
+    </div>
+
+    @if (!_isInitialized)
+    {
+        <div class="flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-200 rounded-xl bg-white space-y-4">
+            <div class="w-12 h-12 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin"></div>
+            <p class="text-slate-600 font-medium font-myanmar">အဘိဓာန်ကို အဆင်သင့်ဖြစ်အောင် လုပ်ဆောင်နေပါသည်...</p>
+            <p class="text-xs text-slate-400">Loading dictionary files into memory...</p>
+        </div>
+    }
+    else
+    {
+        <div class="relative flex flex-col space-y-4">
+            <div class="flex items-center justify-between">
+                <label class="text-sm font-semibold text-slate-700 uppercase tracking-wider">တည်းဖြတ်ရန် နေရာ</label>
+                <div class="flex items-center space-y-0 space-x-2">
+                    <button @onclick="ClearText" class="text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors">Clear</button>
+                    <span class="text-slate-300">|</span>
+                    <button @onclick="ExportText" class="text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors">Export .txt</button>
+                </div>
+            </div>
+
+            <div id="@_editorId"
+                 @ref="_editorContainer" 
+                 contenteditable="true"
+                 @oninput="HandleInput"
+                 class="min-h-[400px] p-6 text-xl leading-relaxed text-slate-800 bg-white border border-slate-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-300 transition-all font-myanmar"
+                 placeholder="ဤနေရာတွင် စာရိုက်ပါ...">
+            </div>
+
+            <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+                <div>@_wordCount words | @_charCount characters</div>
+                <div class="flex items-center space-x-1">
+                    <div class="w-2 h-2 rounded-full @(_isDictionaryLoaded ? "bg-emerald-500" : "bg-amber-500")"></div>
+                    <span>@(_isDictionaryLoaded ? "Dictionary Offline-Ready" : "Loading Dictionary...")</span>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (_showPopup && _suggestions.Any())
+    {
+        <div class="fixed z-[100] p-1 bg-white border border-slate-200 rounded-lg shadow-xl animate-in fade-in zoom-in-95 duration-100"
+             style="left: @(_popupLeft)px; top: @(_popupTop)px; min-width: 150px;">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 py-1 mb-1 border-b border-slate-50">Suggestions</div>
+            <div class="flex flex-col">
+                @foreach (var suggestion in _suggestions)
+                {
+                    <button @onclick="() => ApplySuggestion(suggestion)" 
+                            class="px-3 py-2 text-left hover:bg-slate-50 text-slate-900 text-sm font-medium rounded-md transition-colors font-myanmar">
+                        @suggestion
+                    </button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private ElementReference _editorContainer;
+    private bool _isInitialized = false;
+    private bool _isDictionaryLoaded = false;
+    private string _currentText = "";
+    private int _wordCount = 0;
+    private int _charCount = 0;
+    private List<string> _suggestions = new();
+    private string _selectedWord = "";
+    
+    private bool _showPopup = false;
+    private double _popupLeft = 0;
+    private double _popupTop = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isInitialized = true;
+        
+        // Background loading of dictionary
+        var words = await DictionaryLoader.LoadAllWordsAsync();
+        SpellCheckService.Initialize(words);
+        _isDictionaryLoaded = true;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _isInitialized)
+        {
+            await JSRuntime.InvokeVoidAsync("spellCheck.initEditor", _editorId, DotNetObjectReference.Create(this));
+        }
+    }
+
+    [JSInvokable]
+    public void ShowSuggestions(string word, double left, double top)
+    {
+        _selectedWord = word;
+        _suggestions = SpellCheckService.GetSuggestions(word);
+        _popupLeft = left;
+        _popupTop = top;
+        _showPopup = true;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void HideSuggestions()
+    {
+        _showPopup = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        _currentText = await JSRuntime.InvokeAsync<string>("eval", $"document.getElementById('{_editorId}').innerText");
+        UpdateStats();
+        await RunSpellCheckDebounced();
+    }
+
+    private System.Threading.Timer? _debounceTimer;
+    private readonly string _editorId = "spell-editor";
+
+    private async Task RunSpellCheckDebounced()
+    {
+        _debounceTimer?.Dispose();
+        _debounceTimer = new System.Threading.Timer(async _ => 
+        {
+            await InvokeAsync(async () => 
+            {
+                var words = _currentText.Split(new[] { ' ', '\n', '\r', '\t', '.', ',', '!', '?', '(', ')', '[', ']', '{', '}' }, StringSplitOptions.RemoveEmptyEntries);
+                var misspelled = words.Where(w => !SpellCheckService.IsWordCorrect(w)).Distinct().ToList();
+                
+                await JSRuntime.InvokeVoidAsync("spellCheck.updateHighlights", _editorId, misspelled);
+            });
+        }, null, 500, System.Threading.Timeout.Infinite);
+    }
+
+    private void UpdateStats()
+    {
+        _charCount = _currentText.Length;
+        _wordCount = _currentText.Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
+    }
+
+    private void ClearText()
+    {
+        _currentText = "";
+        _wordCount = 0;
+        _charCount = 0;
+        _suggestions.Clear();
+        _showPopup = false;
+        // Clear editor via JS
+        JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('{_editorId}').innerText = ''");
+    }
+
+    private async Task ExportText()
+    {
+        var text = await JSRuntime.InvokeAsync<string>("eval", $"document.getElementById('{_editorId}').innerText");
+        await JSRuntime.InvokeVoidAsync("spellCheck.downloadText", "corrected_text.txt", text);
+    }
+
+    private async Task ApplySuggestion(string suggestion)
+    {
+        await JSRuntime.InvokeVoidAsync("spellCheck.replaceWord", _editorId, _selectedWord, suggestion);
+        _showPopup = false;
+        _suggestions.Clear();
+        
+        // Trigger a re-check after replacement
+        _currentText = await JSRuntime.InvokeAsync<string>("eval", $"document.getElementById('{_editorId}').innerText");
+        UpdateStats();
+        await RunSpellCheckDebounced();
+    }
+}
