@@ -1,0 +1,175 @@
+<div class="flex flex-col min-h-[calc(100vh-4rem)]">
+    <!-- Hero Section -->
+    <section class="relative py-16 md:py-24 bg-gradient-to-b from-primary/5 via-background to-background overflow-hidden">
+        <div class="container relative z-10 max-w-4xl mx-auto px-4 text-center space-y-8">
+            <div class="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                @* <div class="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                    Premium Myanmar Language Tools
+                </div> *@
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-[#1e40af] to-[#7c3aed] bg-clip-text text-transparent">
+                    Myanmar Dictionary
+                </h1>
+                <p class="max-w-[600px] mx-auto text-lg md:text-xl text-muted-foreground">
+                    Instantly search through thousands of Myanmar words. Fast, precise, and works entirely offline.
+                </p>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="relative max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-12 duration-700 delay-100 group">
+                <div class="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 opacity-50 blur transition duration-500 group-focus-within:opacity-100"></div>
+                <div class="relative flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="absolute left-4 text-muted-foreground group-focus-within:text-primary transition-colors">
+                        <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" 
+                           class="w-full h-16 pl-12 pr-4 bg-background border-2 border-border rounded-2xl text-xl font-myanmar focus:outline-none focus:border-primary transition-all shadow-xl placeholder:text-muted-foreground/50" 
+                           placeholder="စာရိုက်ပြီး ရှာဖွေပါ..." 
+                           @bind="SearchText" 
+                           @bind:event="oninput" 
+                           @onkeyup="async () => await HandleSearch()" />
+                </div>
+                
+                @if (string.IsNullOrWhiteSpace(SearchText))
+                {
+                    <div class="flex flex-wrap items-center justify-center gap-2 mt-6">
+                        <span class="text-sm font-medium text-muted-foreground">Try:</span>
+                        @foreach (var suggestion in new[] { "က", "ခ", "မြန်မာ", "အဘိဓာန်", "စာလုံးပေါင်း" })
+                        {
+                            <button class="px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-medium hover:bg-primary hover:text-primary-foreground transition-all active:scale-95" 
+                                    @onclick='() => SetSearchText(suggestion)'>
+                                @suggestion
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="container max-w-5xl mx-auto px-4 py-12 flex-1">
+        @if (IsLoading)
+        {
+            <div class="flex flex-col items-center justify-center py-20 animate-in fade-in duration-500">
+                <div class="relative h-12 w-12">
+                    <div class="absolute inset-0 rounded-full border-4 border-primary/20"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+                </div>
+                <p class="mt-4 text-sm font-medium text-muted-foreground animate-pulse">Searching the repository...</p>
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            <div class="grid gap-8 animate-in slide-in-from-bottom-6 duration-500">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6">
+                    <div class="space-y-1">
+                        <h2 class="text-2xl font-bold tracking-tight">Search Results</h2>
+                        <p class="text-sm text-muted-foreground">Found matches for "@SearchText"</p>
+                    </div>
+                    <div class="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
+                        @Results.Count Matches
+                    </div>
+                </div>
+                
+                @if (Results.Any())
+                {
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        @foreach (var word in Results)
+                        {
+                            <button class="bg-card hover:bg-accent border border-border rounded-2xl p-5 text-left transition-all hover:shadow-lg hover:shadow-primary/5 hover:border-primary/50 group flex flex-col gap-3 group" 
+                                    @onclick="async () => await SelectWord(word)">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xl font-bold font-myanmar group-hover:text-primary transition-colors">@word</span>
+                                    <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider bg-muted px-2 py-0.5 rounded">Entry</span>
+                                </div>
+                            </button>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="flex flex-col items-center justify-center p-16 bg-muted/20 rounded-3xl border-2 border-dashed border-border text-center space-y-4">
+                        <div class="h-16 w-16 text-muted-foreground/30">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="text-xl font-bold">No results found</h3>
+                            <p class="text-muted-foreground">We couldn't find any results for "@SearchText". Try a different term.</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Welcome Info Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                <div class="p-8 rounded-3xl bg-card border border-border shadow-sm hover:shadow-md transition-shadow">
+                    <div class="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Accurate Data</h3>
+                    <p class="text-sm text-muted-foreground leading-relaxed">Sourced from authoritative Myanmar-English and Myanmar-Myanmar repositories.</p>
+                </div>
+                <div class="p-8 rounded-3xl bg-card border border-border shadow-sm hover:shadow-md transition-shadow">
+                    <div class="h-12 w-12 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Instant Search</h3>
+                    <p class="text-sm text-muted-foreground leading-relaxed">Blazing fast search that results as you type, optimized for all devices.</p>
+                </div>
+                <div class="p-8 rounded-3xl bg-card border border-border shadow-sm hover:shadow-md transition-shadow">
+                    <div class="h-12 w-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Privacy Focused</h3>
+                    <p class="text-sm text-muted-foreground leading-relaxed">No data ever leaves your device. All dictionary assets are local.</p>
+                </div>
+            </div>
+        }
+    </section>
+</div>
+
+@code {
+    [Inject] public DictionaryLoaderService DictionaryLoader { get; set; } = default!;
+    
+    private string SearchText { get; set; } = "";
+    private List<string> Results { get; set; } = new();
+    private bool IsLoading { get; set; } = false;
+
+    private async Task HandleSearch()
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            Results.Clear();
+            return;
+        }
+
+        IsLoading = true;
+        try
+        {
+            Results = await DictionaryLoader.SearchWordsAsync(SearchText);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task SelectWord(string word)
+    {
+        SearchText = word;
+        await HandleSearch();
+    }
+
+    private async Task SetSearchText(string text)
+    {
+        SearchText = text;
+        await HandleSearch();
+    }
+}
