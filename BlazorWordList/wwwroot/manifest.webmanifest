@@ -1,17 +1,25 @@
 {
-  "name": "BlazorWordList",
-  "short_name": "BlazorWordList",
+  "name": "Myanmar Dictionary",
+  "short_name": "Myanmar Dict",
+  "description": "A lightning-fast, privacy-first Myanmar language dictionary and spell checker. Works entirely offline.",
   "id": "./",
   "start_url": "./",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
-  "theme_color": "#03173d",
+  "theme_color": "#38bdf8",
   "prefer_related_applications": false,
   "icons": [
     {
       "src": "logo.svg",
       "type": "image/svg+xml",
-      "sizes": "192x192 512x512"
+      "sizes": "any",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": [
+    "education",
+    "utilities"
+  ],
+  "lang": "my"
 }
