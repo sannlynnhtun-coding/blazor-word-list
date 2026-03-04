@@ -36,20 +36,22 @@ jobs:
       # 4. Handle Dependencies and Build CSS
       - name: Install dependencies and build CSS
         run: |
-          cd BlazorWordList
           npm install
           npm run build:css
+        working-directory: BlazorWordList
 
       # 5. Handle .NET Dependencies and Build
       - name: Restore & Build
         run: |
           dotnet restore BlazorWordList.csproj
           dotnet build BlazorWordList.csproj --configuration Release --no-restore
+        working-directory: BlazorWordList
 
       # 6. Compile the Wasm Project for Production
       - name: Publish WasmApp
         if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-        run: dotnet publish BlazorWordList.csproj -c Release -o release
+        run: dotnet publish BlazorWordList.csproj -c Release -o ../release
+        working-directory: BlazorWordList
 
       # 7. Push to Vercel
       - name: Deploy to Vercel
@@ -60,4 +62,4 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: '--prod'
-          working-directory: ./release/wwwroot # Vercel needs the static assets folder
+          working-directory: ./release/wwwroot # This is relative to the checkout root
